@@ -3,7 +3,7 @@
 #include <string.h>
 
 void addToStack(char value, int stackNumber);
-void moveToStack(int from, int to);
+void moveToStack(int from, int to, int count);
 void printStacks();
 
 struct stack {
@@ -24,15 +24,11 @@ int main(void) {
     int readingStacks = 1;
 
     for (int i = 0; i < 10; i++) {
-        /* stacks[i] = (struct stack*) malloc(sizeof(struct stack));
-        stackHeads[i] = stacks[i];
-        stacks[i]->value = '_';
-        stacks[i]->next = NULL; */
         stacks[i] = NULL;
         stackHeads[i] = NULL;
     }
 
-    fp = fopen("testinput.txt", "r");
+    fp = fopen("input.txt", "r");
 
     while (fgets(line, 40, fp) != NULL) {
         if (line[1] == '1') {
@@ -45,13 +41,12 @@ int main(void) {
             addToStack(line[1], 1);
             addToStack(line[5], 2);
             addToStack(line[9], 3);
-            /* addToStack(line[13], 4);
+            addToStack(line[13], 4);
             addToStack(line[17], 5);
             addToStack(line[21], 6);
             addToStack(line[25], 7);
             addToStack(line[29], 8);
-            addToStack(line[33], 9); */
-            // printf("1: %c 2: %c 3: %c\n", line[1], line[5], line[9]);
+            addToStack(line[33], 9);
         }
 
         if (strlen(line) == 1) {
@@ -65,11 +60,7 @@ int main(void) {
             int to;
 
             sscanf(line, "move %d from %d to %d", &count, &where, &to);
-            // printf("Process line: %d %d %d\n", count, where, to);
-
-            for (int i = 0; i < count; i++) {
-                moveToStack(where, to);
-            }
+            moveToStack(where, to, count);
         }
     }
     
@@ -109,21 +100,22 @@ void addToStack(char value, int stackNumber) {
     }
 }
 
-void moveToStack(int from, int to) {
-    // printf("MOVE %d -> %d\n", from, to);
+void moveToStack(int from, int to, int count) {
     STACK *fromHead = stackHeads[from];
+    STACK *lastToMove = stackHeads[from];
     STACK *toHead = stackHeads[to];
-    STACK *newHead = fromHead->next;
 
-    fromHead->next = toHead;
-    stackHeads[from] = newHead;
+    for (int i = 0; i < count - 1; i++) {
+        lastToMove = lastToMove->next;
+    }
+
+    stackHeads[from] = lastToMove->next;
+    lastToMove->next = toHead;
     stackHeads[to] = fromHead;
-
-    // printStacks();
 }
 
 void printStacks() {
-    for (int j = 1; j < 4; j++) {
+    for (int j = 1; j < 10; j++) {
         printf("%d: ", j);
         STACK *sp = stackHeads[j];
 
