@@ -3,7 +3,6 @@
 #include <string.h>
 
 void addToStack(char value, int stackNumber);
-void addToStack2(char value, int stackNumber);
 void moveToStack(int from, int to);
 void printStacks();
 
@@ -25,13 +24,15 @@ int main(void) {
     int readingStacks = 1;
 
     for (int i = 0; i < 10; i++) {
-        stacks[i] = (struct stack*) malloc(sizeof(struct stack));
+        /* stacks[i] = (struct stack*) malloc(sizeof(struct stack));
         stackHeads[i] = stacks[i];
-        stacks[i]->value = ' ';
-        stacks[i]->next = NULL;
+        stacks[i]->value = '_';
+        stacks[i]->next = NULL; */
+        stacks[i] = NULL;
+        stackHeads[i] = NULL;
     }
 
-    fp = fopen("input.txt", "r");
+    fp = fopen("testinput.txt", "r");
 
     while (fgets(line, 40, fp) != NULL) {
         if (line[1] == '1') {
@@ -44,12 +45,12 @@ int main(void) {
             addToStack(line[1], 1);
             addToStack(line[5], 2);
             addToStack(line[9], 3);
-            addToStack(line[13], 4);
+            /* addToStack(line[13], 4);
             addToStack(line[17], 5);
             addToStack(line[21], 6);
             addToStack(line[25], 7);
             addToStack(line[29], 8);
-            addToStack(line[33], 9);
+            addToStack(line[33], 9); */
             // printf("1: %c 2: %c 3: %c\n", line[1], line[5], line[9]);
         }
 
@@ -69,7 +70,6 @@ int main(void) {
             for (int i = 0; i < count; i++) {
                 moveToStack(where, to);
             }
-            // printStacks();
         }
     }
     
@@ -77,66 +77,60 @@ int main(void) {
 
     printStacks();
 
+    // Free used memory for stacks
+    for (int i = 0; i < 10; i++) {
+        STACK *head = stackHeads[i];
+        STACK *ptr = head;
+        while (ptr != NULL) {
+            head = ptr->next;
+            free(ptr);
+            ptr = head;
+        }
+    }
+
     return 0;
 }
 
 void addToStack(char value, int stackNumber) {
     if (value != ' ') {
-        if (stacks[stackNumber]->value == ' ') {
-            stacks[stackNumber]->value = value;
-            return;
-        }
-
         STACK *stack = (STACK*) malloc(sizeof(STACK));
 
         stack->value = value;
-        stacks[stackNumber]->next = stack;
+        
+        if (stacks[stackNumber] != NULL) {
+            stacks[stackNumber]->next = stack;
+        }
+
         stacks[stackNumber] = stack;
-    }
-}
 
-void addToStack2(char value, int stackNumber) {
-    if (value != ' ') {
-        if (stackHeads[stackNumber]->value == ' ') {
-            stackHeads[stackNumber]->value = value;
-            return;
+        if (stackHeads[stackNumber] == NULL) {
+            stackHeads[stackNumber] = stack;
         }
-
-        STACK *stack = (STACK*) malloc(sizeof(STACK));
-
-        stack->value = value;
-        stack->next = stackHeads[stackNumber];
-        // stackHeads[stackNumber]->next = stack;
-        stackHeads[stackNumber] = stack;
     }
 }
 
 void moveToStack(int from, int to) {
-    // printf("%d %d\n", from, to);
+    // printf("MOVE %d -> %d\n", from, to);
     STACK *fromHead = stackHeads[from];
-    char value = fromHead->value;
+    STACK *toHead = stackHeads[to];
+    STACK *newHead = fromHead->next;
 
-    if (fromHead->next == NULL) {
-        stackHeads[from] = (STACK*) malloc(sizeof(STACK));
-        stackHeads[from]->next = NULL;
-    } else {
-        stackHeads[from] = fromHead->next;
-    }
+    fromHead->next = toHead;
+    stackHeads[from] = newHead;
+    stackHeads[to] = fromHead;
 
     // printStacks();
-    addToStack2(value, to);
-    free(fromHead);
 }
 
 void printStacks() {
-    for (int j = 1; j < 10; j++) {
+    for (int j = 1; j < 4; j++) {
         printf("%d: ", j);
         STACK *sp = stackHeads[j];
 
-        do {
+        while (sp != NULL) {
             printf("%c ", sp->value);
             sp = sp->next;
-        } while (sp != NULL);
+        }
         printf("\n");
     }
     printf("\n");
